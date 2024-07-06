@@ -107,6 +107,7 @@ copydb_copy_extensions(CopyDataSpec *copySpecs, bool createExtensions)
 
 	/* make sure that we have our own process local connection */
 	TransactionSnapshot snapshot = { 0 };
+	
 	if (!copydb_copy_snapshot(copySpecs, &snapshot))
 	{
 		/* errors have already been logged */
