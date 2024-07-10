@@ -6541,7 +6541,7 @@ catalog_iter_s_extension_checker(DatabaseCatalog *catalog)
 	}
 
 
-	return true;
+	return false;
 }
 
 /*
