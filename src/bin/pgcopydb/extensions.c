@@ -417,12 +417,12 @@ copydb_parse_extensions_requirements(CopyDataSpec *copySpecs, char *filename)
 bool
 copydb_prepare_extensions_restore(CopyDataSpec *copySpecs)
 {
-	bool *timescaledb = false;
+	bool timescaledb = false;
 	Catalogs *catalogs = &(copySpecs->catalogs);
 	DatabaseCatalog *filtersDB = &(catalogs->filter);
-	catalog_iter_s_extension_timescaledb_checker(filtersDB, timescaledb);
+	catalog_iter_s_extension_timescaledb_checker(filtersDB, &timescaledb);
 
-	if (*timescaledb)
+	if (timescaledb)
 	{
 		log_debug("Timescaledb extension is present");
 		if (!timescaledb_pre_restore(copySpecs))

@@ -6500,6 +6500,8 @@ catalog_iter_s_extension_timescaledb_checker(DatabaseCatalog *catalog,
 
 	iter->catalog = catalog;
 
+	*timescaledb=false;
+
 	if (!catalog_iter_s_extension_init(iter))
 	{
 		/* errors have already been logged */
