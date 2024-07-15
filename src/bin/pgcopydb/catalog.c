@@ -6493,7 +6493,7 @@ catalog_add_s_extension_config(DatabaseCatalog *catalog,
 */
 bool
 catalog_iter_s_extension_timescaledb_checker(DatabaseCatalog *catalog,
-											 bool timescaledb)
+											 bool *timescaledb)
 {
 	SourceExtensionIterator *iter =
 		(SourceExtensionIterator *) calloc(1, sizeof(SourceExtensionIterator));
@@ -6534,7 +6534,9 @@ catalog_iter_s_extension_timescaledb_checker(DatabaseCatalog *catalog,
 			{
 				return false;
 			}
-			timescaledb = true;
+
+			*timescaledb = true;
+
 		}
 
 	}
