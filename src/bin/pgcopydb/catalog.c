@@ -6536,6 +6536,8 @@ catalog_iter_s_extension_timescaledb_checker(DatabaseCatalog *catalog,
 			}
 
 			*timescaledb = true;
+			
+			return true;
 
 		}
 
