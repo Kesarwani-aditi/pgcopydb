@@ -473,7 +473,7 @@ bool catalog_s_database_guc_fetch(SQLiteQuery *query);
 /*
  * Namespaces
  */
-bool catalog_add_s_namespace(DatabaseCatalog * catalog, SourceSchema *namespace);
+bool catalog_add_s_namespace(DatabaseCatalog * catalog, SourceSchema * namespace);
 bool catalog_lookup_s_namespace_by_oid(DatabaseCatalog *catalog,
 									   uint32_t oid,
 									   SourceSchema *result);
@@ -509,6 +509,9 @@ typedef bool (SourceExtensionIterFun)(void *context, SourceExtension *ext);
 bool catalog_iter_s_extension(DatabaseCatalog *catalog,
 							  void *context,
 							  SourceExtensionIterFun *callback);
+
+bool catalog_iter_s_extension_timescaledb_checker(DatabaseCatalog *catalog,
+												  bool *timescaledb);
 
 typedef struct SourceExtensionIterator
 {

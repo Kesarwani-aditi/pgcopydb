@@ -1434,31 +1434,31 @@ pgsql_set_search_path(PGSQL *pgsql, char *search_path, bool local)
 bool
 pgsql_prepend_search_path(PGSQL *pgsql, const char *namespace)
 {
-	char search_path[BUFSIZE] = { 0 };
+char search_path[BUFSIZE] = { 0 };
 
-	if (!pgsql_get_search_path(pgsql, search_path, sizeof(search_path)))
-	{
-		/* errors have already been logged */
-		return false;
-	}
-
-	if (IS_EMPTY_STRING_BUFFER(search_path))
-	{
-		return pgsql_set_search_path(pgsql, (char *) namespace, true);
-	}
-	else
-	{
-		char new_search_path[BUFSIZE] = { 0 };
-
-		sformat(new_search_path, sizeof(new_search_path),
-				"%s, %s",
-				namespace,
-				search_path);
-
-		return pgsql_set_search_path(pgsql, new_search_path, true);
-	}
-
+if (!pgsql_get_search_path(pgsql, search_path, sizeof(search_path)))
+{
+	/* errors have already been logged */
 	return false;
+}
+
+if (IS_EMPTY_STRING_BUFFER(search_path))
+{
+	return pgsql_set_search_path(pgsql, (char *) namespace, true);
+}
+else
+{
+	char new_search_path[BUFSIZE] = { 0 };
+
+	sformat(new_search_path, sizeof(new_search_path),
+			"%s, %s",
+			namespace,
+			search_path);
+
+	return pgsql_set_search_path(pgsql, new_search_path, true);
+}
+
+return false;
 }
 
 
@@ -4930,7 +4930,7 @@ pgsql_replication_slot_exists(PGSQL *pgsql, const char *slotName,
 		pgsql->pgversion_num < 90600
 		?
 
-		/* Postgres 9.5 does not have confirmed_flush_lsn */
+	    /* Postgres 9.5 does not have confirmed_flush_lsn */
 		"SELECT restart_lsn "
 		"FROM pg_replication_slots WHERE slot_name = $1"
 		:

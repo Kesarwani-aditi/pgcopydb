@@ -1356,7 +1356,7 @@ copydb_copy_table(CopyDataSpec *specs, PGSQL *src, PGSQL *dst,
 		retry =
 			attempts < maxAttempts &&
 
-			/* retry only on Connection Exception errors */
+		    /* retry only on Connection Exception errors */
 			(pgsql_state_is_connection_error(src) ||
 			 pgsql_state_is_connection_error(dst));
 

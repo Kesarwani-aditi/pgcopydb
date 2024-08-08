@@ -5064,11 +5064,11 @@ catalog_prepare_filter(DatabaseCatalog *catalog,
 		"     select oid, restore_list_name, 'table' "
 		"       from s_table "
 
-		/*
-		 * This is only for materialized views. Materialized view refresh
-		 * filtering is done with the help of s_matview table on source
-		 * catalog.
-		 */
+	    /*
+	     * This is only for materialized views. Materialized view refresh
+	     * filtering is done with the help of s_matview table on source
+	     * catalog.
+	     */
 		"  union all "
 
 		"	 select oid, restore_list_name, 'matview' "
@@ -5081,44 +5081,44 @@ catalog_prepare_filter(DatabaseCatalog *catalog,
 
 		"  union all "
 
-		/* at the moment we lack restore names for constraints */
+	    /* at the moment we lack restore names for constraints */
 		"     select oid, NULL as restore_list_name, 'constraint' "
 		"       from s_constraint "
 
-		/*
-		 * Filtering-out sequences works with the following 3 Archive Catalog
-		 * entry kinds:
-		 *
-		 *  - SEQUENCE, matched by sequence oid
-		 *  - SEQUENCE OWNED BY, matched by sequence restore name
-		 *  - DEFAULT, matched by attribute oid
-		 *
-		 * In some cases we want to create the sequence, but we might want to
-		 * skip the SEQUENCE OWNED BY statement, because we didn't actually
-		 * create the owner table.
-		 *
-		 * In those cases we will find the sequence both in the catalogs of
-		 * objects we want to migrate, and also in the list of objects we want
-		 * to skip. The catalog entry typically has seq->ownedby !=
-		 * seq->attrelid, where the ownedby table is skipped from the migration
-		 * because of the filtering.
-		 */
+	    /*
+	     * Filtering-out sequences works with the following 3 Archive Catalog
+	     * entry kinds:
+	     *
+	     *  - SEQUENCE, matched by sequence oid
+	     *  - SEQUENCE OWNED BY, matched by sequence restore name
+	     *  - DEFAULT, matched by attribute oid
+	     *
+	     * In some cases we want to create the sequence, but we might want to
+	     * skip the SEQUENCE OWNED BY statement, because we didn't actually
+	     * create the owner table.
+	     *
+	     * In those cases we will find the sequence both in the catalogs of
+	     * objects we want to migrate, and also in the list of objects we want
+	     * to skip. The catalog entry typically has seq->ownedby !=
+	     * seq->attrelid, where the ownedby table is skipped from the migration
+	     * because of the filtering.
+	     */
 		"  union all "
 
-		/*
-		 * When we find the sequence in our source catalog selection, then we
-		 * still create it and refrain to add the sequence Oid to our hash
-		 * table here.
-		 */
+	    /*
+	     * When we find the sequence in our source catalog selection, then we
+	     * still create it and refrain to add the sequence Oid to our hash
+	     * table here.
+	     */
 		"     select distinct s.oid, NULL as restore_list_name, 'sequence' "
 		"       from s_seq s "
 		"      where not exists"
 		"            (select 1 from source.s_seq ss where ss.oid = s.oid)"
 
-		/*
-		 * Only filter-out the SEQUENCE OWNED BY when our catalog selection
-		 * does not contain the target table.
-		 */
+	    /*
+	     * Only filter-out the SEQUENCE OWNED BY when our catalog selection
+	     * does not contain the target table.
+	     */
 		"  union all "
 
 		"     select NULL as oid, restore_list_name, 'sequence owned by' "
@@ -5135,11 +5135,11 @@ catalog_prepare_filter(DatabaseCatalog *catalog,
 		"                      where st.oid = s.ownedby) "
 		"            ) as seqownedby "
 
-		/*
-		 * Also add pg_attribute.oid when it's not null (non-zero here). This
-		 * takes care of the DEFAULT entries in the pg_dump Archive Catalog,
-		 * and these entries target the attroid directly.
-		 */
+	    /*
+	     * Also add pg_attribute.oid when it's not null (non-zero here). This
+	     * takes care of the DEFAULT entries in the pg_dump Archive Catalog,
+	     * and these entries target the attroid directly.
+	     */
 		"  union all "
 
 		"     select distinct s.attroid, s.restore_list_name, 'default' "
@@ -6173,51 +6173,51 @@ catalog_iter_s_coll_finish(SourceCollationIterator *iter)
 bool
 catalog_add_s_namespace(DatabaseCatalog *catalog, SourceSchema *namespace)
 {
-	sqlite3 *db = catalog->db;
+sqlite3 *db = catalog->db;
 
-	if (db == NULL)
-	{
-		log_error("BUG: catalog_add_s_namespace: db is NULL");
-		return false;
-	}
+if (db == NULL)
+{
+	log_error("BUG: catalog_add_s_namespace: db is NULL");
+	return false;
+}
 
-	char *sql =
-		"insert into s_namespace(oid, nspname, restore_list_name) "
-		"values($1, $2, $3)";
+char *sql =
+	"insert into s_namespace(oid, nspname, restore_list_name) "
+	"values($1, $2, $3)";
 
-	SQLiteQuery query = { 0 };
+SQLiteQuery query = { 0 };
 
-	if (!catalog_sql_prepare(db, sql, &query))
-	{
-		/* errors have already been logged */
-		return false;
-	}
+if (!catalog_sql_prepare(db, sql, &query))
+{
+	/* errors have already been logged */
+	return false;
+}
 
-	/* bind our parameters now */
-	BindParam params[] = {
-		{ BIND_PARAMETER_TYPE_INT64, "oid", namespace->oid, NULL },
-		{ BIND_PARAMETER_TYPE_TEXT, "nspname", 0, namespace->nspname },
+/* bind our parameters now */
+BindParam params[] = {
+	{ BIND_PARAMETER_TYPE_INT64, "oid", namespace->oid, NULL },
+	{ BIND_PARAMETER_TYPE_TEXT, "nspname", 0, namespace->nspname },
 
-		{ BIND_PARAMETER_TYPE_TEXT, "restore_list_name", 0,
-		  namespace->restoreListName }
-	};
+	{ BIND_PARAMETER_TYPE_TEXT, "restore_list_name", 0,
+	  namespace->restoreListName }
+}
 
-	int count = sizeof(params) / sizeof(params[0]);
+int count = sizeof(params) / sizeof(params[0]);
 
-	if (!catalog_sql_bind(&query, params, count))
-	{
-		/* errors have already been logged */
-		return false;
-	}
+if (!catalog_sql_bind(&query, params, count))
+{
+	/* errors have already been logged */
+	return false;
+}
 
-	/* now execute the query, which does not return any row */
-	if (!catalog_sql_execute_once(&query))
-	{
-		/* errors have already been logged */
-		return false;
-	}
+/* now execute the query, which does not return any row */
+if (!catalog_sql_execute_once(&query))
+{
+	/* errors have already been logged */
+	return false;
+}
 
-	return true;
+return true;
 }
 
 
@@ -6489,6 +6489,66 @@ catalog_add_s_extension_config(DatabaseCatalog *catalog,
 		/* errors have already been logged */
 		return false;
 	}
+
+	return true;
+}
+
+
+/*
+ *   catalog_iter_s_extesnion_timescaledb_checker , iterates over the list of extensions in our catalogs
+ *   and checks for presence of timescaledb extension.
+ */
+bool
+catalog_iter_s_extension_timescaledb_checker(DatabaseCatalog *catalog,
+											 bool *timescaledb)
+{
+	SourceExtensionIterator *iter =
+		(SourceExtensionIterator *) calloc(1, sizeof(SourceExtensionIterator));
+
+	iter->catalog = catalog;
+
+	*timescaledb = false;
+
+	if (!catalog_iter_s_extension_init(iter))
+	{
+		/* errors have already been logged */
+		return false;
+	}
+
+	for (;;)
+	{
+		if (!catalog_iter_s_extension_next(iter))
+		{
+			/* errors have already been logged */
+			return false;
+		}
+
+		SourceExtension *ext = iter->ext;
+
+		if (ext == NULL)
+		{
+			if (!catalog_iter_s_extension_finish(iter))
+			{
+				/* errors have already been logged */
+				return false;
+			}
+
+			break;
+		}
+
+		if (strcmp(ext->extname, "timescaledb") == 0)
+		{
+			if (!catalog_iter_s_extension_finish(iter))
+			{
+				return false;
+			}
+
+			*timescaledb = true;
+
+			return true;
+		}
+	}
+
 
 	return true;
 }
